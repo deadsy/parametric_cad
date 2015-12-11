@@ -68,23 +68,19 @@ module involute_gear_tooth (
   start_angle = involute_angle(base_radius, max(base_radius, root_radius));
   stop_angle = involute_angle(base_radius, outer_radius);
   dtheta = (stop_angle - start_angle) / involute_facets;
+  angles = [for (i=[0:involute_facets]) start_angle + (i * dtheta)];
 
-  union() {
-    for (i=[0:involute_facets - 1]) {
-      theta = start_angle + (i * dtheta);
-      // create the involute points and rotate them down
-      p0 = rotate_point(involute(base_radius, theta), -center_angle);
-      p1 = rotate_point(involute(base_radius, theta + dtheta), -center_angle);
-      // mirror the points across the x axis
-      p0m = mirror_x(p0);
-      p1m = mirror_x(p1);
-      // build the trapezoid for the segment
-      polygon (
-        points = [[0,0], p0, p1, p1m, p0m],
-        paths = [[0,1,2,3,4,0]]
-      );
-    }
-  }
+  // work out the polygon points
+  t_lower = [for (a=angles) rotate_point(involute(base_radius, a), -center_angle)];
+  t_upper = [for (p=t_lower) mirror_x(p)];
+  t_points = concat([[0,0]], t_lower, t_upper);
+
+  // work out the polygon paths
+  p_lower = [for (i=[0 : 1 : involute_facets + 1]) i];
+  p_upper = [for (i=[2 * involute_facets + 2 : -1 : involute_facets + 2]) i];
+  t_path = concat(p_lower, p_upper);
+
+  polygon(points=t_points, paths = [t_path], convexity = 2);
 }
 
 //------------------------------------------------------------------
@@ -200,13 +196,13 @@ module helical_gear(
 
 module test_involute_gear_tooth() {
   involute_gear_tooth (
-    number_teeth = 20,
-    pitch_radius = 10,
-    root_radius = 8,
-    base_radius = 9,
-    outer_radius = 11,
+    number_teeth = 10,
+    pitch_radius = 0.15625,
+    root_radius = 0.125,
+    base_radius = 0.146827,
+    outer_radius = 0.1875,
     backlash = 0,
-    involute_facets = 5
+    involute_facets = 10
   );
 }
 
