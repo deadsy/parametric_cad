@@ -33,6 +33,15 @@ function rotate_point(p, theta) = [
 ];
 
 //------------------------------------------------------------------
+// generate a polygon for a single involute tooth
+
+// number_teeth = number of teeth
+// pitch_radius = radius of pitch circle
+// root radius = radius at tooth root
+// base_radius = radius at the base of the involute
+// outer_radius = radius at the outside of the tooth
+// backlash = backlash expressed as units of pitch circumference
+// involute_facets = number of facets for involute flank
 
 module involute_gear_tooth (
   number_teeth,
@@ -71,6 +80,7 @@ module involute_gear_tooth (
 
 //------------------------------------------------------------------
 // generate a 2D involute gear
+
 // number_teeth = number of teeth
 // pitch_diameter = diameter of pitch circle
 // pressure_angle = pressure angle (degrees)
@@ -118,13 +128,14 @@ module involute_gear(
            );
         }
       }
-      circle(r = root_radius);
+      circle(r = root_radius, $fn = facets(root_radius));
     }
     circle(r = ring_radius, $fn = facets(ring_radius));
   }
 }
 
 //------------------------------------------------------------------
+// generate a spur gear (straight teeth)
 
 module spur_gear(
   number_teeth,
@@ -150,6 +161,7 @@ module spur_gear(
 }
 
 //------------------------------------------------------------------
+// generate a helical gear (helical teeth)
 
 module helical_gear(
   number_teeth,
@@ -179,6 +191,8 @@ module helical_gear(
 }
 
 //------------------------------------------------------------------
+// generate a herringbone gear
+// back to back helical gears to remove axial thrust
 
 module herringbone_gear(
   number_teeth,
@@ -228,10 +242,10 @@ module herringbone_gear(
 module test_involute_gear_tooth() {
   involute_gear_tooth (
     number_teeth = 10,
-    pitch_radius = 0.15625,
-    root_radius = 0.125,
-    base_radius = 0.146827,
-    outer_radius = 0.1875,
+    pitch_radius = 20,
+    root_radius = 15,
+    base_radius = 16,
+    outer_radius = 22,
     backlash = 0,
     involute_facets = 10
   );
@@ -245,33 +259,33 @@ module test_involute_gear() {
     backlash = 0,
     clearance = 0,
     ring_width = 5,
-    involute_facets = 10
+    involute_facets = 8
   );
 }
 
 module test_spur_gear() {
   spur_gear(
     number_teeth = 20,
-    pitch_diameter = 2,
+    pitch_diameter = 50,
     pressure_angle = 20,
     backlash = 0,
     clearance = 0,
-    ring_width = 0.2,
-    involute_facets = 5,
-    height = 0.25
+    ring_width = 10,
+    involute_facets = 8,
+    height = 8
   );
 }
 
 module test_helical_gear() {
   helical_gear(
     number_teeth = 32,
-    pitch_diameter = 4,
+    pitch_diameter = 100,
     pressure_angle = 20,
     backlash = 0,
     clearance = 0,
-    ring_width = 0.2,
-    involute_facets = 5,
-    height = 1,
+    ring_width = 10,
+    involute_facets = 8,
+    height = 25,
     helix_angle = 15
   );
 }
@@ -279,13 +293,13 @@ module test_helical_gear() {
 module test_herringbone_gear() {
   herringbone_gear(
     number_teeth = 32,
-    pitch_diameter = 4,
+    pitch_diameter = 100,
     pressure_angle = 20,
     backlash = 0,
     clearance = 0,
-    ring_width = 0.2,
-    involute_facets = 5,
-    height = 1,
+    ring_width = 25,
+    involute_facets = 8,
+    height = 25,
     helix_angle = 15
   );
 }
