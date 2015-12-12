@@ -5,24 +5,10 @@ Involute Gears
 
 */
 //------------------------------------------------------------------
-// control the number of facets on cylinders
 
-_accuracy = 0.001;
-function facets(r) = 180 / acos(1 - (_accuracy / r));
+use <utils.scad>;
 
 //------------------------------------------------------------------
-
-epsilon = 0.001;
-
-//------------------------------------------------------------------
-
-pi = 3.1415926535;
-
-// degrees to radians
-function d2r(d) = (d * pi) / 180;
-
-// radians to degrees
-function r2d(r) = (180 * r) / pi;
 
 // return the involute coordinate
 // r = base radius
@@ -132,7 +118,7 @@ module involute_gear(
            );
         }
       }
-      circle(r = root_radius, $fn = facets(root_radius));
+      circle(r = root_radius);
     }
     circle(r = ring_radius, $fn = facets(ring_radius));
   }
@@ -141,14 +127,14 @@ module involute_gear(
 //------------------------------------------------------------------
 
 module spur_gear(
-  number_teeth = 20,
-  pitch_diameter = 2,
-  pressure_angle = 20,
-  backlash = 0,
-  clearance = 0,
-  ring_width = 0.2,
-  involute_facets = 5,
-  height = 1
+  number_teeth,
+  pitch_diameter,
+  pressure_angle,
+  backlash,
+  clearance,
+  ring_width,
+  involute_facets,
+  height
 ) {
   linear_extrude(height = height) {
     involute_gear(
@@ -189,6 +175,51 @@ module helical_gear(
       ring_width = ring_width,
       involute_facets = involute_facets
     );
+  }
+}
+
+//------------------------------------------------------------------
+
+module herringbone_gear(
+  number_teeth,
+  pitch_diameter,
+  pressure_angle,
+  backlash,
+  clearance,
+  ring_width,
+  involute_facets,
+  height,
+  helix_angle
+) {
+
+  union() {
+    helical_gear(
+      number_teeth = number_teeth,
+      pitch_diameter = pitch_diameter,
+      pressure_angle = pressure_angle,
+      backlash = backlash,
+      clearance = clearance,
+      ring_width = ring_width,
+      involute_facets = involute_facets,
+      height = height/2,
+      helix_angle = helix_angle
+    );
+
+    translate([0,0,height]) {
+      rotate([180,0,0]) {
+        helical_gear(
+          number_teeth = number_teeth,
+          pitch_diameter = pitch_diameter,
+          pressure_angle = pressure_angle,
+          backlash = backlash,
+          clearance = clearance,
+          ring_width = ring_width,
+          involute_facets = involute_facets,
+          height = height/2,
+          helix_angle = -helix_angle
+        );
+      }
+    }
   }
 }
 
@@ -245,12 +276,28 @@ module test_helical_gear() {
   );
 }
 
+module test_herringbone_gear() {
+  herringbone_gear(
+    number_teeth = 32,
+    pitch_diameter = 4,
+    pressure_angle = 20,
+    backlash = 0,
+    clearance = 0,
+    ring_width = 0.2,
+    involute_facets = 5,
+    height = 1,
+    helix_angle = 15
+  );
+}
+
+
 //------------------------------------------------------------------
 
 //test_involute_gear_tooth();
 //test_involute_gear();
 //test_spur_gear();
-test_helical_gear();
+//test_helical_gear();
+test_herringbone_gear();
 
 //------------------------------------------------------------------
 

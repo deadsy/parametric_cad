@@ -1,54 +1,51 @@
 //------------------------------------------------------------------
 
-
-
-//------------------------------------------------------------------
-
+use <utils.scad>;
 use <gears.scad>;
 
 //------------------------------------------------------------------
 
 module oil_pump_wheel() {
 
-  gear_width = 1/4;
+  gear_width = dim(1/4);
 
   difference() {
-
     union() {
       translate([0,0,-gear_width/2]) {
         spur_gear(
           number_teeth = 40,
-          pitch_diameter = 5/4,
+          pitch_diameter = dim(5/4),
           pressure_angle = 20,
-          backlash = 0,
-          clearance = 0,
-          ring_width = 3/32,
-          involute_facets = 5,
+          backlash = dim(0),
+          clearance = dim(0),
+          ring_width = dim(3/32),
+          involute_facets = 8,
           height = gear_width
         );
       }
+      // gear body
       cylinder(
         h = gear_width/2,
-        r = 1/2,
-        $fn = facets(1/2),
+        r = dim(1/2),
         center = true
       );
+      // hub
       cylinder(
-        h = 3/4,
-        r = 1/4,
-        $fn = facets(1/4),
+        h = dim(3/4),
+        r = dim(1/4),
+        $fn = facets(dim(1/4)),
         center = true
       );
     }
-
+    // holes in gear body
     union() {
       for(i = [0:5]) {
         rotate([0,0,i * 60]) {
-          translate([3/8,0,0]) {
+          translate([dim(3/8),0,0]) {
             cylinder(
-              h = 1,
-              r = 1/8,
-              $fn = facets(1/8),
+              h = gear_width,
+              r = dim(7/64),
+              $fn = facets(dim(7/64)),
               center = true
             );
           }
@@ -58,20 +55,22 @@ module oil_pump_wheel() {
   }
 }
 
+
 //------------------------------------------------------------------
 
 module oil_pump_pinion() {
 
-  gear_width = 1/4;
+  gear_width = dim(1/4);
+
   translate([0,0,-gear_width/2]) {
     spur_gear(
       number_teeth = 10,
-      pitch_diameter = 5/16,
+      pitch_diameter = dim(5/16),
       pressure_angle = 20,
-      backlash = 0,
-      clearance = 0,
-      ring_width = 0.1,
-      involute_facets = 5,
+      backlash = dim(0),
+      clearance = dim(0),
+      ring_width = dim(0.1),
+      involute_facets = 8,
       height = gear_width
     );
   }
@@ -82,8 +81,8 @@ module oil_pump_pinion() {
 
 module wallaby_gears() {
 
-//  oil_pump_wheel();
-  oil_pump_pinion();
+  oil_pump_wheel();
+//  oil_pump_pinion();
 
 /*
   translate([3,0,0]) {
