@@ -7,8 +7,8 @@ Adapters for connecting a tool to a dust collector.
 //------------------------------------------------------------------
 // Set the scaling value to compensate for print shrinkage
 
-scale = 1/0.92; // ABS ~8% shrinkage
-//scale = 1/0.98; // PLA ~2% shrinkage
+scale = 1/0.995; // ABS ~0.5% shrinkage
+//scale = 1/0.998; // PLA ~0.2% shrinkage
 
 function dim(x) = scale * x;
 
@@ -17,11 +17,11 @@ function dim(x) = scale * x;
 // of the pipes on the tool and the vaccuum.
 
 // Specify the outside diameter of the pipes to be fitted:
-diameter_1 = dim(57.15); // mm
-diameter_2 = dim(42.16); // mm
+diameter_1 = dim(57.4); // mm
+diameter_2 = dim(42.1); // mm
 
 // Specify the length of the adapter at the respective diameters:
-length_1 = dim(30); // mm
+length_1 = dim(40); // mm
 length_2 = dim(30); // mm
 
 // Specify the transition length between the diameters:
@@ -33,7 +33,7 @@ wall_thickness = dim(4); // mm
 
 // The ID of the adapter will be larger than the OD of the fitted
 // pipe by this clearance factor:
-clearance = 1.02; // no unit
+clearance = 1.017; // no unit
 
 // An internal taper in the adapter will allow a push fit:
 taper = 1; // degrees
@@ -59,8 +59,11 @@ module adapter_wall() {
   ir2 = r2 * clearance;
   or1 = ir1 + wall_thickness;
   or2 = ir2 + wall_thickness;
-  t1 = length_1 * sin(taper);
-  t2 = length_2 * sin(taper);
+  t1 = length_1 * tan(taper);
+  t2 = length_2 * tan(taper);
+
+  echo("nominal od1 is ", or1 * 2, "mm");
+  echo("nominal od2 is ", or2 * 2, "mm");
 
   points = [
     [ir1,0],
