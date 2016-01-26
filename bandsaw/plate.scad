@@ -12,13 +12,14 @@ Parameters can be changed to match other bandsaws.
 //------------------------------------------------------------------
 // Parameters
 
-plate_diameter = 69.6;
+plate_diameter = 69.1;
 plate_height = 4.0;
-pin_diameter = 2.9;
-pin_spacing = 65.3;
-pin_height = 2.0;
 throat_width = 6.0;
 throat_length = 54.0;
+pin_diameter = 3.0;
+pin_spacing = 64.0;
+pin_height = 2.0;
+with_holes = 1;
 hole_diameter = 6.0;
 hole_spacing = 12.0;
 
@@ -115,7 +116,9 @@ module plate() {
     }
     union() {
       throat();
-      holes();
+      if (with_holes != 0) {
+        holes();
+      }
     }
   }
 }

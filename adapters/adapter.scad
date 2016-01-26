@@ -25,9 +25,9 @@ transition_length = 20;
 // wall thickness (mm)
 wall_thickness = 4;
 // The adapter ID will be larger than the pipe OD by this factor
-clearance = 1.017;
+clearance = 1.018;
 // internal taper (degrees)
-taper = 1;
+taper = 0.9;
 
 //------------------------------------------------------------------
 // Set the scaling value to compensate for print shrinkage
