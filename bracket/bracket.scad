@@ -7,28 +7,30 @@ Angle Brackets
 //------------------------------------------------------------------
 // Parameters
 
-bracket_angle = 80;
+bracket_angle = 70;
 
-bracket_length = 120;
-arm1_length = 30;
-arm2_length = 30;
+bracket_length = 200;
+arm1_length = 40;
+arm2_length = 40;
 wall_thickness = 3;
 
-arm1_holes = 3;
+arm1_holes = 2;
 arm1_hole_diameter = 5;
-arm1_hole_spacing = 0.8;
+arm1_hole_spacing = 0.3;
 arm1_hole_position = 0.7;
+arm1_hole_elongation = 2.0;
 
-arm2_holes = 2;
-arm2_hole_diameter = 6;
-arm2_hole_spacing = 0.4;
-arm2_hole_position = 0.6;
+arm2_holes = 3;
+arm2_hole_diameter = 4;
+arm2_hole_spacing = 0.7;
+arm2_hole_position = 0.7;
+arm2_hole_elongation = 1.0;
 
 number_of_webs = 4;
-web_size = 0.8;
-web_spacing = 0.3;
+web_size = 0.7;
+web_spacing = 0.1;
 
-fillet_factor = 1.0;
+fillet_factor = 2.0;
 rounding_factor = 0.2;
 
 //------------------------------------------------------------------
@@ -89,11 +91,22 @@ module filleted(r=1) {
 
 //------------------------------------------------------------------
 
-module hole(n, r, k) {
+module hole(r) {
+  cylinder(h=wall_t + (2 * epsilon), r = r, $fn=facets(r));
+}
+
+module hole_set(n, r, k, e) {
   space = bracket_l/(n - 1 + (2 * k));
   for (i = [1:n]) {
     translate([(k + i - 1) * space, 0, -epsilon]) {
-      cylinder(h=wall_t + (2 * epsilon), r = r, $fn=facets(r));
+      if (e != 0) {
+        hull() {
+          translate([0, e * r, 0]) hole(r);
+          hole(r);
+        }
+      } else {
+        hole(r);
+      }
     }
   }
 }
@@ -101,7 +114,7 @@ module hole(n, r, k) {
 module holes() {
   if (arm1_holes > 0) {
     translate([arm1_hole_position * arm1,0,0]) rotate([-90,-90,0]) {
-      hole(arm1_holes, arm1_hole_r, arm1_hole_spacing);
+      hole_set(arm1_holes, arm1_hole_r, arm1_hole_spacing, -arm1_hole_elongation);
     }
   }
   if (arm2_holes > 0) {
@@ -109,7 +122,7 @@ module holes() {
     c = cos(bracket_angle);
     s = sin(bracket_angle);
     translate([d * c, d * s, 0]) rotate([0,-90,90+bracket_angle]) {
-      hole(arm2_holes, arm2_hole_r, arm2_hole_spacing);
+      hole_set(arm2_holes, arm2_hole_r, arm2_hole_spacing, arm2_hole_elongation);
     }
   }
 }
