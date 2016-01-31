@@ -5,36 +5,41 @@ Angle Brackets
 
 */
 //------------------------------------------------------------------
-// Parameters
+/* [Global] */
 
+/*[General]*/
 bracket_angle = 108;
-
 bracket_length = 80;
-arm1_length = 40;
-arm2_length = 40;
 wall_thickness = 4;
 
+/*[Arm1]*/
+arm1_length = 40;
 arm1_holes = 2;
-arm1_hole_style = "plain";
+arm1_hole_style = "plain"; // [plain,countersunk]
 arm1_hole_diameter = 6.4;
-arm1_hole_spacing = 0.5;
-arm1_hole_position = 0.7;
+arm1_hole_spacing = 0.5; // [0:0.05:1]
+arm1_hole_position = 0.7; // [0:0.05:1]
 arm1_hole_elongation = 4.0;
 
+/*[Arm2]*/
+arm2_length = 40;
 arm2_holes = 3;
-arm2_hole_style = "countersunk";
+arm2_hole_style = "countersunk"; // [plain,countersunk]
 arm2_hole_diameter = 4.8;
-arm2_hole_spacing = 0.4;
-arm2_hole_position = 0.7;
+arm2_hole_spacing = 0.4; // [0:0.05:1]
+arm2_hole_position = 0.7; // [0:0.05:1]
 arm2_hole_elongation = 0.0;
 
+/*[Webs]*/
 number_of_webs = 3;
-web_size = 0.5;
-web_spacing = 0.1;
+web_size = 0.5; // [0:0.05:1]
+web_spacing = 0.1; // [0:0.05:1]
 
+/*[Fillets]*/
 fillet_factor = 2.0;
-rounding_factor = 0.2;
+rounding_factor = 0.2; // [0:0.05:1]
 
+/* [Hidden] */
 //------------------------------------------------------------------
 // Set the scaling value to compensate for print shrinkage
 
@@ -102,7 +107,7 @@ module hole(r, style) {
         [2 * r, wall_t + (2 * epsilon)],
         [0, wall_t + (2 * epsilon)]
       ];
-      rotate_extrude($fn=facets(r)) polygon(points = points);    
+      rotate_extrude($fn=facets(r)) polygon(points = points);
     } else {
       points = [
         [0,0],
@@ -111,7 +116,7 @@ module hole(r, style) {
         [2 * r, wall_t + (2 * epsilon)],
         [0, wall_t + (2 * epsilon)]
       ];
-      rotate_extrude($fn=facets(r)) polygon(points = points);    
+      rotate_extrude($fn=facets(r)) polygon(points = points);
     }
   } else {
     // plain hole
@@ -166,7 +171,7 @@ module web_profile() {
 }
 
 module web() {
-  linear_extrude(height=wall_t) web_profile();
+  linear_extrude(height=wall_t, convexity=2) web_profile();
 }
 
 module webs() {
@@ -195,7 +200,7 @@ module bracket_profile() {
 module bracket() {
   difference() {
     union() {
-      linear_extrude(height=bracket_l) bracket_profile();
+      linear_extrude(height=bracket_l, convexity=2) bracket_profile();
       if (number_of_webs > 0) {
         webs();
       }
