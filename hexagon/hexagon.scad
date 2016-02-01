@@ -10,6 +10,7 @@
 
 hexagon_radius = 10;
 rounding_factor = 0.4;
+cell_size = 0.9;
 
 //------------------------------------------------------------------
 // Set the scaling value to compensate for print shrinkage
@@ -64,7 +65,6 @@ module filleted(r=1) {
 //------------------------------------------------------------------
 
 module n_agon(n, r) {
-
   dtheta = 360/n;
   angle = [for (i=[0:n-1]) (i * dtheta)];
   points = [for (a=angle) [r * cos(a), r * sin(a)]];
@@ -77,16 +77,28 @@ module hexagon(r) {
 
 //------------------------------------------------------------------
 
-module honeycomb_row(posn, n) {
-  delta = [(3/2) * hex_r, (sqrt(3)/2) * hex_r, 0];
-  for (i = [0:n]) {
+module honeycomb_row(posn, cols, r1, r2) {
+  delta = [(3/2) * r1, (sqrt(3)/2) * r1, 0];
+  for (i = [0:cols-1]) {
     t = [posn[0] + i * delta[0], posn[1] + i * delta[1], 0];
     translate(t) {
-      rounded(hex_r * rounding_factor) hexagon(hex_r + epsilon);
+      hexagon(r2);
     }
   }
 }
 
-honeycomb_row([0,0,0], 10);
+module honeycomb_grid(posn, rows, cols, r1, r2) {
+  delta = [(3/2) * r1, (sqrt(3)/2) * r1, 0];
+  for (i = [0:rows-1]) {
+    t = [posn[0] + i * delta[0], posn[1] - i * delta[1], 0];
+    honeycomb_row(t, cols, r1, r2);
+  }
+}
 
+linear_extrude(height=50) {
+  difference () {
+    outset((1 - cell_size) * hex_r) honeycomb_grid([0,0,0], 10, 10, hex_r, hex_r + epsilon);
+    rounded(3) honeycomb_grid([0,0,0], 10, 10, hex_r, hex_r * cell_size);
+  }
+}
 //------------------------------------------------------------------

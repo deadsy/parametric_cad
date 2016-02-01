@@ -7,6 +7,7 @@ LED Rope Light Bracket
 //------------------------------------------------------------------
 /* [Global] */
 
+/*[General]*/
 internal_length = 13.6;
 internal_height = 7;
 bracket_width = 8;
