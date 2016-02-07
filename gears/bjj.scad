@@ -1,11 +1,12 @@
 //------------------------------------------------------------------
 
-use <utils.scad>;
+include <utils.scad>;
 use <gears.scad>;
 
 //------------------------------------------------------------------
 
-gear_module = scale(80/16);
+gear_module = scale(16.8/pi);
+pressure_angle = 20;
 gear_backlash = scale(0);
 gear_clearance = scale(0);
 involute_facets = 10;
@@ -19,9 +20,6 @@ hub_height = scale(2);
 
 hole_radius = scale(9.525/2); // 3/8"
 
-// small tweak to avoid differencing artifacts
-epsilon = 0.05;
-
 //------------------------------------------------------------------
 
 module stacked_gears() {
@@ -32,7 +30,7 @@ module stacked_gears() {
       spur_gear(
         number_teeth = sg1_teeth,
         pitch_diameter = sg1_pd,
-        pressure_angle = 20,
+        pressure_angle = pressure_angle,
         backlash = gear_backlash,
         clearance = gear_clearance,
         ring_width = sg1_pd / 2,
@@ -45,7 +43,7 @@ module stacked_gears() {
         spur_gear(
           number_teeth = sg2_teeth,
           pitch_diameter = sg2_pd,
-          pressure_angle = 20,
+          pressure_angle = pressure_angle,
           backlash = gear_backlash,
           clearance = gear_clearance,
           ring_width = sg2_pd / 2,
@@ -68,6 +66,22 @@ module stacked_gears() {
   }
 }
 
-stacked_gears();
+//------------------------------------------------------------------
+
+module crown_rack() {
+  rack(
+    number_teeth = 10,
+    gear_module = gear_module,
+    pressure_angle = pressure_angle,
+    backlash = gear_backlash,
+    base_height = scale(5),
+    base_width = sg_height
+  );
+}
+
+//------------------------------------------------------------------
+
+crown_rack();
+//stacked_gears();
 
 //------------------------------------------------------------------

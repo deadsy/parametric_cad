@@ -6,7 +6,7 @@ Involute Gears
 */
 //------------------------------------------------------------------
 
-use <utils.scad>;
+include <utils.scad>;
 
 //------------------------------------------------------------------
 
@@ -131,6 +131,80 @@ module involute_gear(
       circle(r = root_radius, $fn = facets(root_radius));
     }
     circle(r = ring_radius, $fn = facets(ring_radius));
+  }
+}
+
+//------------------------------------------------------------------
+// generate a 2D gear rack
+
+module rack_tooth_2d(
+  gear_module,
+  pressure_angle,
+  backlash
+) {
+  // addendum: distance from pitch line to top of tooth
+  addendum = gear_module * 1;
+  // dedendum: distance from pitch line to root of tooth
+  dedendum = gear_module * 1.25;
+  // tooth_pitch: tooth to tooth distance along pitch line
+  tooth_pitch = gear_module * pi;
+
+  dx = (addendum + dedendum) * tan(pressure_angle);
+  dxt = (tooth_pitch / 2) - dx;
+
+  points = [
+    [backlash + 0, 0],
+    [backlash + dx, addendum + dedendum],
+    [dx + dxt - backlash, addendum + dedendum],
+    [(2 * dx) + dxt - backlash, 0],
+  ];
+  polygon(points=points, convexity = 2);
+}
+
+module rack_2d(
+  number_teeth,
+  gear_module,
+  pressure_angle,
+  backlash,
+  base_height
+) {
+  tooth_pitch = gear_module * pi;
+  // base
+  points = [
+    [0, base_height],
+    [number_teeth * tooth_pitch, base_height],
+    [number_teeth * tooth_pitch, 0],
+    [0, 0],
+  ];
+  polygon(points=points, convexity=2);
+  // teeth
+  for(i = [0:number_teeth - 1]) {
+    translate([tooth_pitch * i,base_height - epsilon,0]) {
+      rack_tooth_2d(
+        gear_module = gear_module,
+        pressure_angle = pressure_angle,
+        backlash = backlash
+      );
+    }
+  }
+}
+
+module rack(
+  number_teeth,
+  gear_module,
+  pressure_angle,
+  backlash,
+  base_height,
+  base_width
+) {
+  linear_extrude(height=base_width) {
+    rack_2d(
+      number_teeth = number_teeth,
+      gear_module = gear_module,
+      pressure_angle = pressure_angle,
+      backlash = backlash,
+      base_height = base_height
+    );
   }
 }
 
@@ -304,6 +378,16 @@ module test_herringbone_gear() {
   );
 }
 
+module test_rack() {
+  rack(
+    number_teeth = 10,
+    gear_module = 10,
+    pressure_angle = 20,
+    backlash = 0,
+    base_height = 10,
+    base_width = 40
+  );
+}
 
 //------------------------------------------------------------------
 
@@ -312,6 +396,7 @@ module test_herringbone_gear() {
 //test_spur_gear();
 //test_helical_gear();
 //test_herringbone_gear();
+test_rack();
 
 //------------------------------------------------------------------
 
