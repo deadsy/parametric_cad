@@ -147,7 +147,7 @@ module spur_gear(
   involute_facets,
   height
 ) {
-  linear_extrude(height = height) {
+  linear_extrude(height = height, convexity=2) {
     involute_gear(
       number_teeth = number_teeth,
       pitch_diameter = pitch_diameter,
@@ -311,7 +311,7 @@ module test_herringbone_gear() {
 //test_involute_gear();
 //test_spur_gear();
 //test_helical_gear();
-test_herringbone_gear();
+//test_herringbone_gear();
 
 //------------------------------------------------------------------
 
