@@ -220,23 +220,33 @@ module crown_gear(
   gear_module,
   pressure_angle,
   backlash,
-  base_height,
-  base_width
+  tooth_length,
+  pitch_posn,
+  base_height
 ){
   pitch_radius = (number_teeth * gear_module) / 2;
+  inner_radius = pitch_radius - (pitch_position * tooth_length);
+  outer_radius = inner_radius + tooth_length;
+  extra_radius = outer_radius * 1.1;
+  tooth_height = gear_module * 2.25;
+
   dtheta = 360 / number_teeth;
   difference() {
-    union() {
-      cylinder(h = base_height + epsilon, r = pitch_radius, $fn = facets(pitch_radius));
-      translate([0,0,base_height])
-      for (i = [0:number_teeth]) {
-        rotate([0,0,i * dtheta]) rotate([90,0,0])
-          linear_extrude(height = pitch_radius)
-            rack_tooth_2d(gear_module, pressure_angle, backlash);
+    intersection() {
+      union() {
+        cylinder(h = base_height + epsilon, r = extra_radius, $fn = facets(extra_radius));
+        translate([0,0,base_height])
+        for (i = [0:number_teeth]) {
+          rotate([0,0,i * dtheta]) rotate([90,0,0])
+            linear_extrude(height = extra_radius)
+              rack_tooth_2d(gear_module, pressure_angle, backlash);
+        }
       }
+      translate([0,0,-epsilon])
+        cylinder(h = base_height + tooth_height + (2 * epsilon), r = outer_radius, $fn = facets(outer_radius));
     }
     translate([0,0,-epsilon])
-    cylinder(h = 4 * base_height, r = pitch_radius - base_width, $fn = facets(pitch_radius));
+      cylinder(h = base_height + tooth_height + (2 * epsilon), r = inner_radius, $fn = facets(inner_radius));
   }
 }
 
@@ -424,8 +434,9 @@ module test_crown_gear() {
     gear_module = 10,
     pressure_angle = 20,
     backlash = 0,
-    base_height = 10,
-    base_width = 20
+    tooth_length = 40,
+    pitch_position = 0.5,
+    base_height = 30
   );
 }
 

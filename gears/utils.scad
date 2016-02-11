@@ -18,7 +18,7 @@ function scale(x) = x * desired_scale * abs_shrink;
 //------------------------------------------------------------------
 // control the number of facets on cylinders
 
-facet_epsilon = 0.01;
+facet_epsilon = 0.05;
 function facets(r) = 180 / acos(1 - (facet_epsilon / r));
 
 // small tweak to avoid differencing artifacts
