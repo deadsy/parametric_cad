@@ -5,7 +5,7 @@ use <gears.scad>;
 
 //------------------------------------------------------------------
 
-gear_module = scale(16.8/pi);
+gear_module = scale(80/16);
 pressure_angle = 20;
 gear_backlash = scale(0);
 gear_clearance = scale(0);
