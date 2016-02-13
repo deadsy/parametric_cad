@@ -7,13 +7,10 @@ Utility Functions/Definitions
 //-----------------------------------------------------------------
 // scaling
 
-desired_scale = 1;
 mm_per_inch = 25.4;
 al_shrink = 1/0.99; // ~1%
 pla_shrink = 1/0.998; //~0.2%
 abs_shrink = 1/0.995; //~0.5%
-
-function scale(x) = x * desired_scale * abs_shrink;
 
 //------------------------------------------------------------------
 // control the number of facets on cylinders
