@@ -74,7 +74,7 @@ module stacked_gears() {
 
 //------------------------------------------------------------------
 
-module crown_gear32() {
+module crown_gear32_1() {
 
   cg_hole_r = scale((5/32) * mm_per_inch);
   cg_hub_r = scale(20/2);
@@ -117,7 +117,56 @@ module crown_gear32() {
 
 //------------------------------------------------------------------
 
-crown_gear32();
+module crown_gear32_2() {
+
+  cg_hole_r = scale((5/32) * mm_per_inch);
+  cg_hub_r = scale(20/2);
+
+  cg_teeth = 32;
+  cg_r = cg_teeth * gear_module / 2;
+  pitch_position = 0.7;
+  tooth_length = scale(10);
+
+  cg_bh1 = scale(3);
+  cg_bh2 = gear_module * 2.25;
+  cg_bh = cg_bh1 + cg_bh2;
+  cg_hub_h = cg_bh + scale(1);
+
+  inner_radius = cg_r - (pitch_position * tooth_length);
+
+  cg_cb_depth = scale(4);
+  cg_cb_r = scale(10);
+
+  difference() {
+    union() {
+      crown_gear(
+        number_teeth = cg_teeth,
+        gear_module = gear_module,
+        pressure_angle = pressure_angle,
+        backlash = gear_backlash,
+        tooth_length = tooth_length,
+        pitch_position = pitch_position,
+        base_height = cg_bh1
+      );
+      cylinder(h=cg_bh, r=inner_radius, $fn = facets(inner_radius));
+      cylinder(h=cg_hub_h, r=cg_hub_r, , $fn = facets(cg_hub_r));
+    }
+    union () {
+      translate([0,0,-epsilon])
+        cylinder(h = cg_hub_h + (2 * epsilon), r = cg_hole_r, $fn = facets(cg_hole_r));
+      translate([0.75 * cg_r,0,-epsilon]) {
+        cylinder(h = cg_bh + (2 * epsilon), r = cg_hole_r, $fn = facets(cg_hole_r));
+        translate([0,0,cg_bh - cg_cb_depth + epsilon])
+          cylinder(h = cg_cb_depth + epsilon, r = cg_cb_r, $fn = facets(cg_cb_r));
+      }
+    }
+  }
+}
+
+//------------------------------------------------------------------
+
+//crown_gear32_1();
+crown_gear32_2();
 //stacked_gears();
 
 //------------------------------------------------------------------
