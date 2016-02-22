@@ -16,10 +16,54 @@ gear_clearance = scale(0);
 involute_facets = 10;
 
 //------------------------------------------------------------------
+
+indent_r = scale((1/16) * mm_per_inch);
+
+module plate_hole_2d() {
+  plate_hole_r = scale(1);
+  circle(r=plate_hole_r, $fn = facets(plate_hole_r));
+}
+
+module plate_holes_2d() {
+  hdelta = scale(17);
+  translate([hdelta,hdelta,0]) plate_hole_2d();
+  translate([-hdelta,hdelta,0]) plate_hole_2d();
+  translate([hdelta,-hdelta,0]) plate_hole_2d();
+  translate([-hdelta,-hdelta,0]) plate_hole_2d();
+}
+
+module plate_indent_2d() {
+  circle(r=indent_r, $fn=facets(indent_r));
+  translate([-indent_r,0,0]) square(size=[2*indent_r,indent_r]);
+}
+
+module plate() {
+
+  plate_r = (16 * gear_module / 2) * 0.8;
+  plate_h = scale(5);
+  rod_length = scale(60);
+
+  difference() {
+    union() {
+      cylinder(r=plate_r, h = plate_h, $fn = facets(plate_r));
+    }
+    union() {
+      translate([0,0,-epsilon]) {
+        cylinder(r=hole_radius, h=plate_h+(2*epsilon), $fn = facets(hole_radius));
+        linear_extrude(height=plate_h+(2*epsilon), convexity=2) plate_holes_2d();
+      }
+      rotate([90,0,0]) translate([0, plate_h-indent_r+epsilon, -rod_length/2])
+        linear_extrude(height=rod_length, convexity=2) plate_indent_2d();
+    }
+  }
+}
+
+
+//------------------------------------------------------------------
 // stacked gears
 
 hub_radius = scale(20/2);
-hub_height = scale(2);
+hub_height = scale(1);
 
 hole_radius = scale((3/16) * mm_per_inch); // 3/8"
 
@@ -62,12 +106,11 @@ module stacked_gears() {
         cylinder(r=hub_radius, h=hub_height + epsilon, $fn = facets(hub_radius));
       }
     }
-    translate([0,0,-epsilon]) {
-        cylinder(
-          r=hole_radius,
-          h=hub_height + (2 * sg_height) + 2 * epsilon,
-          $fn = facets(hub_radius)
-        );
+    union() {
+      translate([0,0,-epsilon]) {
+        cylinder(r=hole_radius, h=hub_height+(2*sg_height)+2*epsilon, $fn = facets(hub_radius));
+        linear_extrude(height=scale(5), convexity=2) plate_holes_2d();
+      }
     }
   }
 }
@@ -166,7 +209,9 @@ module crown_gear32_2() {
 //------------------------------------------------------------------
 
 //crown_gear32_1();
-crown_gear32_2();
-//stacked_gears();
+//crown_gear32_2();
+stacked_gears();
+translate([0,0,-10]) plate();
+
 
 //------------------------------------------------------------------
