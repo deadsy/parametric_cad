@@ -20,7 +20,7 @@ involute_facets = 10;
 indent_r = scale((1/16) * mm_per_inch);
 
 module plate_hole_2d() {
-  plate_hole_r = scale(1);
+  plate_hole_r = scale(0.6);
   circle(r=plate_hole_r, $fn = facets(plate_hole_r));
 }
 
@@ -39,9 +39,9 @@ module plate_indent_2d() {
 
 module plate() {
 
-  plate_r = (16 * gear_module / 2) * 0.8;
+  plate_r = (16 * gear_module / 2) * 0.83;
   plate_h = scale(5);
-  rod_length = scale(60);
+  rod_length = scale(62);
 
   difference() {
     union() {
@@ -109,7 +109,7 @@ module stacked_gears() {
     union() {
       translate([0,0,-epsilon]) {
         cylinder(r=hole_radius, h=hub_height+(2*sg_height)+2*epsilon, $fn = facets(hub_radius));
-        linear_extrude(height=scale(5), convexity=2) plate_holes_2d();
+        linear_extrude(height=scale(10), convexity=2) plate_holes_2d();
       }
     }
   }
@@ -211,7 +211,7 @@ module crown_gear32_2() {
 //crown_gear32_1();
 //crown_gear32_2();
 stacked_gears();
-translate([0,0,-10]) plate();
+//plate();
 
 
 //------------------------------------------------------------------
