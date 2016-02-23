@@ -208,12 +208,12 @@ module crown_gear32_2(mode) {
   }
   
   if (mode == "handle") {
-    handle_r1 = scale(10);
-    handle_h1 = scale(6);
-    handle_r2 = scale(15);
-    handle_h2 = scale(20);
-    handle_hole_r = scale(2);
-    handle_hole_d = scale(10);
+    handle_r1 = scale(11);
+    handle_h1 = scale(7);
+    handle_r2 = scale(13);
+    handle_h2 = scale(26);
+    handle_hole_r = scale(1.2);
+    handle_hole_d = scale(13);
     handle_shaft_r = 0.97 * cg_hole_r;
     handle_shaft_h = 1.03 * (cg_bh - cg_cb_depth);
   
