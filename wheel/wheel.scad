@@ -10,13 +10,14 @@ A wheel with a flat surface on one side and a hub on the other.
 /* [Global] */
 
 /*[General]*/
-wheel_diameter = 360;
+wheel_diameter = 25.4 * 12;
 hub_diameter = 50;
-hub_length = 60;
-shaft_diameter = 25;
+hub_height = 50;
+shaft_diameter = 25.4;
 shaft_length = 40;
-wall_height = 40;
+wall_height = 25;
 wall_thickness = 6;
+plate_thickness = 6;
 
 /*[Webs]*/
 number_of_webs = 6;
@@ -24,7 +25,7 @@ web_size_at_hub = 0.8; // [0:0.05:1]
 web_height_at_wall = 0.8; // [0:0.05:1]
 
 /*[Casting]*/
-draft_angle = 2;
+draft_angle = 4;
 
 /*[Fillets]*/
 fillet_factor = 2.0;
@@ -42,9 +43,14 @@ function dim(x) = scale * x;
 //------------------------------------------------------------------
 // derived values
 
-
-
-
+wheel_r = dim(wheel_diameter/2);
+hub_r = dim(hub_diameter/2);
+hub_h = dim(hub_height);
+shaft_r = dim(shaft_diameter/2);
+shaft_l = dim(shaft_length);
+wall_h = dim(wall_height);
+wall_t = dim(wall_thickness);
+plate_t = dim(plate_thickness);
 
 //------------------------------------------------------------------
 // control the number of facets on cylinders
@@ -85,10 +91,36 @@ module filleted(r=1) {
 }
 
 //------------------------------------------------------------------
+// generate a 2D polygon for the wheel profile
 
+module wheel_profile() {
 
+  draft0 = (hub_h - plate_t) * tan(draft_angle);
+  draft1 = (wall_h - plate_t) * tan(draft_angle);
+  draft2 = wall_h * tan(draft_angle);
 
+  points = [
+    [0, 0],
+    [0, hub_h],
+    [hub_r, hub_h],
+    [hub_r + draft0, plate_t],
+    [wheel_r - wall_t - draft1, plate_t],
+    [wheel_r - wall_t, wall_h],
+    [wheel_r, wall_h],
+    [wheel_r + draft2, 0],
+  ];
 
+  polygon(points=points, convexity = 2);
+}
 
+//------------------------------------------------------------------
+
+module wheel() {
+  rotate_extrude(angle = 360, $fn = facets(hub_r)) {
+    wheel_profile();
+  }
+}
+
+wheel();
 
 //------------------------------------------------------------------
