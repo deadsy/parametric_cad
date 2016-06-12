@@ -169,7 +169,7 @@ def output_dxf(p, fname):
 
 #------------------------------------------------------------------------------
 
-def output_scad(e_list, fname):
+def output_scad1(e_list, fname):
     f = open(fname, 'w')
     for e in e_list:
       e.emit_scad(f)
@@ -191,6 +191,45 @@ def output_scad(e_list, fname):
       f.write('}\n')
 
     f.close()
+
+#------------------------------------------------------------------------------
+
+def output_scad2(e_list, fname):
+  f = open(fname, 'w')
+  for e in e_list:
+    e.emit_scad(f)
+
+  w = 4.2 * shaft_r
+  d = 1.2 * shaft_r
+  h = (core_h + shaft_l) * 1.1
+
+  hole_r = dim(((3.0/16.0) * 25.4) / 2.0)
+
+  f.write('module hole() {\n')
+  f.write('rotate([0,-90,0]) cylinder(h=%f,r=%f,$fn=%d);\n' % (d, hole_r, facets(hole_r)))
+  f.write('}\n')
+
+  dy = w * 0.37
+  x0 = h * 0.1
+  x1 = h * 0.9
+
+  f.write('module holes() {\n')
+  f.write('translate([0,%f,%f]) hole();\n' % (dy,x0))
+  f.write('translate([0,%f,%f]) hole();\n' % (-dy,x0))
+  f.write('translate([0,%f,%f]) hole();\n' % (dy,x1))
+  f.write('translate([0,%f,%f]) hole();\n' % (-dy,x1))
+  f.write('}\n')
+
+  f.write('rotate([0,-90,0])\n')
+  f.write('difference() {\n')
+  f.write('translate([%f,%f,0]) cube([%f,%f,%f]);\n' % (-d, -w/2, d, w, h))
+  f.write('union() {\n')
+  f.write('core_extrusion();\n')
+  f.write('holes();\n')
+  f.write('}\n')
+  f.write('}\n')
+
+  f.close()
 
 #------------------------------------------------------------------------------
 
@@ -295,6 +334,27 @@ def build_web_profile():
     p.add(x)
   return p
 
+def build_core_profile():
+  """build core profile"""
+  draft = core_h * math.tan(core_draft_angle)
+  x0 = (2 * web_w) + draft
+  x1 = web_w + draft
+  x2 = web_w
+  points = (
+    point(0, 0),
+    point(0, core_h + shaft_l),
+    point(shaft_r, core_h + shaft_l, 2.0),
+    point(shaft_r, core_h),
+    point(shaft_r - draft, 0),
+  );
+  name = 'core'
+  p = polygon(closed = True)
+  p.name = '%s_profile' % name
+  for x in points:
+    p.add(x)
+  return p
+
+
 def build_wheel_extrusion(p):
   e = extrusion('wheel', 'rotate')
   e.profile = p
@@ -306,6 +366,13 @@ def build_web_extrusion(p):
   e = extrusion('web', 'linear')
   e.profile = build_web_profile()
   e.length = wheel_r - (wall_t/2) - shaft_r
+  return e
+
+def build_core_extrusion(p):
+  e = extrusion('core', 'rotate')
+  e.profile = p
+  e.facets = facets(hub_r)
+  e.angle = 360
   return e
 
 #------------------------------------------------------------------------------
@@ -320,7 +387,12 @@ def main():
   e1.profile.smooth()
   output_dxf(e1.profile, 'web.dxf')
 
-  output_scad((e0, e1), 'wheel.scad')
+  e2 = build_core_extrusion(build_core_profile())
+  e2.profile.smooth()
+  output_dxf(e2.profile, 'core.dxf')
+
+  output_scad1((e0, e1), 'wheel.scad')
+  output_scad2((e2,), 'core.scad')
 
 main()
 
