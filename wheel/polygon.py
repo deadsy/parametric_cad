@@ -4,14 +4,20 @@ Polygons
 """
 #------------------------------------------------------------------------------
 
+import dxfwrite
 from dxfwrite import DXFEngine as dxf
+
 import math
+import util
 
 #------------------------------------------------------------------------------
 # 2D vector math
 
 def add(a, b):
   return (a[0] + b[0], a[1] + b[1])
+
+def sub(a, b):
+  return (a[0] - b[0], a[1] - b[1])
 
 def scale(a, k):
   return (k * a[0], k * a[1])
@@ -33,10 +39,10 @@ class point(object):
   # radius for marking the point on a dxf drawing
   dxf_radius = 1.0
 
-  def init(self, p):
+  def __init__(self, p, facets = 0, radius = 0.0):
     self.p = p
-    self.facets = 0
-    self.radius = 0.0
+    self.facets = facets
+    self.radius = radius
 
   def emit_dxf(self, d):
     color = (1,2)[self.radius == 0.0]
@@ -67,6 +73,69 @@ class polygon(object):
     if i == 0:
       return (None, self.points[-1])[self.closed]
     return self.points[i - 1]
+
+  def smooth_point(self, i):
+    """smooth a point- return True if we smoothed it"""
+    p = self.points[i]
+    if p.radius == 0.0:
+      # fixed point
+      return
+    pn = self.next_point(i)
+    pp = self.prev_point(i)
+    if pp is None or pn is None:
+      # can't smooth the endpoints of an open polygon
+      return False
+    # work out the angle
+    v0 = normalise(sub(pp.p, p.p))
+    v1 = normalise(sub(pn.p, p.p))
+    theta = math.acos(dot(v0, v1))
+
+    # distance from vertex to circle tangent
+    d1 = p.radius / math.tan(theta / 2.0)
+    if d1 > length(sub(pp.p, p.p)):
+      print('unable to smooth - radius is too large')
+      return
+    if d1 > length(sub(pn.p, p.p)):
+      print('unable to smooth - radius is too large')
+      return
+    # distance from vertex to circle center
+    d2 = p.radius / math.sin(theta / 2.0)
+
+    # tangent points
+    p0 = add(p.p, scale(v0, d1))
+    p1 = add(p.p, scale(v1, d1))
+
+    # center of circle
+    vc = normalise(add(v0, v1))
+    c = add(p.p, scale(vc, d2))
+
+    # circle angle for tangent p0
+    x = sub(p0, c)
+    theta0 = math.atan2(x[1], x[0])
+
+    # circle angle for tangent p0
+    x = sub(p1, c)
+    theta1 = math.atan2(x[1], x[0])
+
+    # work out the points
+    del self.points[i]
+    dtheta = (theta1 - theta0) / float(p.facets)
+    for j in range(p.facets + 1):
+      theta = theta0 + (j * dtheta)
+      p_new = add(c, (p.radius * math.cos(theta), p.radius * math.sin(theta)))
+      self.points.insert(i + j, point(p_new))
+    return True
+
+  def smooth_single(self):
+    """smooth the polygon"""
+    for i in range(len(self.points)):
+      if self.smooth_point(i):
+        return True
+    return False
+
+  def smooth(self):
+    while self.smooth_single():
+      pass
 
   def emit_dxf(self, d):
     x = []
