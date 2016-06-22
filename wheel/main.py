@@ -20,7 +20,8 @@ def build_polygon():
     point((0.0, 0.0)),
     point((100.0, 100.0), 5, 50.0),
     point((200.0, 0.0), 10, 30.0),
-    point((300.0, 100.0)),
+    point((300.0, 100.0), 7, 5.0),
+    point((0.0, 100.0)),
   ]
 
   p = polygon(closed = False)

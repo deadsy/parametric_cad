@@ -25,11 +25,27 @@ def scale(a, k):
 def dot(a, b):
   return (a[0] * b[0]) + (a[1] * b[1])
 
+def cross(a, b):
+  return (a[0] * b[1]) - (a[1] * b[0])
+
 def length(a):
   return math.sqrt((a[0] * a[0]) + (a[1] * a[1]))
 
 def normalise(a):
   return scale(a, 1/length(a))
+
+def rot_matrix(theta):
+    """rotation matrix: theta radians about the origin"""
+    c = math.cos(theta)
+    s = math.sin(theta)
+    return (c, -s, s, c)
+
+def mult_matrix(a, v):
+    """return x = A.v"""
+    return ((a[0] * v[0]) + (a[1] * v[1]), (a[2] * v[0]) + (a[3] * v[1]))
+
+def sign(a):
+  return (a > 0) - (a < 0)
 
 #------------------------------------------------------------------------------
 
@@ -98,32 +114,28 @@ class polygon(object):
     if d1 > length(sub(pn.p, p.p)):
       print('unable to smooth - radius is too large')
       return
-    # distance from vertex to circle center
-    d2 = p.radius / math.sin(theta / 2.0)
 
     # tangent points
     p0 = add(p.p, scale(v0, d1))
-    p1 = add(p.p, scale(v1, d1))
 
+    # distance from vertex to circle center
+    d2 = p.radius / math.sin(theta / 2.0)
     # center of circle
     vc = normalise(add(v0, v1))
     c = add(p.p, scale(vc, d2))
 
-    # circle angle for tangent p0
-    x = sub(p0, c)
-    theta0 = math.atan2(x[1], x[0])
-
-    # circle angle for tangent p0
-    x = sub(p1, c)
-    theta1 = math.atan2(x[1], x[0])
+    # rotation angle
+    dtheta = sign(cross(v1, v0)) * (math.pi - theta) / p.facets
+    # rotation matrix
+    rm = rot_matrix(dtheta)
+    # radius vector
+    rv = sub(p0, c)
 
     # work out the points
     del self.points[i]
-    dtheta = (theta1 - theta0) / float(p.facets)
     for j in range(p.facets + 1):
-      theta = theta0 + (j * dtheta)
-      p_new = add(c, (p.radius * math.cos(theta), p.radius * math.sin(theta)))
-      self.points.insert(i + j, point(p_new))
+      self.points.insert(i + j, point(add(c, rv)))
+      rv = mult_matrix(rm, rv)
     return True
 
   def smooth_single(self):
