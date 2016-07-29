@@ -29,7 +29,7 @@ def cross(a, b):
   return (a[0] * b[1]) - (a[1] * b[0])
 
 def length(a):
-  return math.sqrt((a[0] * a[0]) + (a[1] * a[1]))
+  return math.sqrt(dot(a, a))
 
 def normalise(a):
   return scale(a, 1/length(a))
