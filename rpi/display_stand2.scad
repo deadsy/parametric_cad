@@ -51,7 +51,7 @@ function scale(x) = pla_shrink * x;
 epsilon = 0.05;
 
 // control the number of facets on cylinders
-facet_epsilon = 0.1;
+facet_epsilon = 0.05;
 function facets(r) = 180 / acos(1 - (facet_epsilon / r));
 
 // rounded/filleted edges
