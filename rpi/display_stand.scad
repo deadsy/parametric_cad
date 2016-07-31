@@ -26,7 +26,7 @@ foot_sizex = 15;
 foot_sizey = 20;
 
 support_height = 120;
-support_thickness1 = 4;
+support_thickness1 = 5;
 support_thickness2 = 12;
 support_hole2edge = 7;
 support_web_radius = 20;
@@ -67,7 +67,7 @@ module filleted(r=1) {
 // 4 x M3 mounting holes on display
 mount_hole_w = scale(126.20);
 mount_hole_h = scale(65.65);
-mount_hole_r = scale(3.1/2);
+mount_hole_r = scale(3.9/2);
 
 // derived values
 base_h = scale(base_height);
