@@ -18,23 +18,26 @@ But:
 //------------------------------------------------------------------
 /* [Global] */
 
+/*[General]*/
 display_angle = 15;
 
+/*[Base]*/
 base_height = 8;
 base_length = 160;
 base_width = 100;
 base_mount_hole_diameter = 4;
 base_hole_rounding = 10;
-base_mount_hole_posn = 0.8;
-
+base_mount_hole_posn = 0.8; // [0:0.05:1]
 foot_sizex = 15;
 foot_sizey = 30;
 
-support_posn = 0.75;
+/*[Supports]*/
+support_posn = 0.75; // [0:0.05:1]
 support_height = 120;
 support_thickness = 5;
 support_hole2edge = 8;
 
+/*[Webs]*/
 web_thickness = 7;
 web_radius = 10;
 
@@ -242,7 +245,7 @@ module display_mount_hole() {
 module display_mount_holes() {
   dx0 = base_w * support_posn;
   dx = support_t + epsilon;
-  dy = support_h - mount_hole_h - (support_h2e * cos(display_angle));
+  dy = (support_h / cos(display_angle)) - mount_hole_h - support_h2e;
   dz = (base_l - mount_hole_w) / 2;
   translate([dx0, 0,0]) rotate([0,0,display_angle]) translate([-dx,dy,dz]) union() {
     dx = mount_hole_w;
