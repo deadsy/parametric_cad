@@ -50,7 +50,8 @@ housing_base_z = 2;
 // camera lid
 lid_x = housing_x - 2 * (housing_lid_clearance + housing_wall_t1);
 lid_y = housing_y - 2 * (housing_lid_clearance + housing_wall_t1);
-lid_z = 4;
+lid_z = 3;
+lid_camera_clearance = 0.2;
 
 //------------------------------------------------------------------
 // utility functions
@@ -229,8 +230,20 @@ module lid_top() {
   }
 }
 
+module lid_camera_hole() {
+  h = lid_z + (2 * epsilon); 
+  r = (camera_body_diameter / 2) + lid_camera_clearance;
+  y_ofs = housing_wall_t0 + housing_board_clearance + camera_body_y_ofs;
+  z_ofs = housing_z - lid_z - epsilon;
+  translate([0,y_ofs,z_ofs])
+    cylinder(h=h, r=r, $fn=facets(r));
+}
+
 module lid() {
-  #lid_top();
+  difference() {    
+    *lid_top();
+    lid_camera_hole();
+  }
 }
 
 //------------------------------------------------------------------
