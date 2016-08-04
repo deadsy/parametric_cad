@@ -34,8 +34,9 @@ camera_connector_y = 5.5;
 camera_connector_z = 2.7;
 
 // camera housing
+housing_hole_clearance = 0.2;
 housing_board_clearance = 0.3;
-housing_lid_clearance = 0.3;
+housing_lid_clearance = 0.4;
 housing_cable_clearance = 0.3;
 housing_wall_t0 = 6; // thick wall in board cavity
 housing_wall_t1 = 2; // thin wall in lid cavity
@@ -51,7 +52,7 @@ housing_base_z = 2;
 lid_x = housing_x - 2 * (housing_lid_clearance + housing_wall_t1);
 lid_y = housing_y - 2 * (housing_lid_clearance + housing_wall_t1);
 lid_z = 3;
-lid_camera_clearance = 0.2;
+lid_camera_clearance = 0.4; // 0.2 is too small
 
 //------------------------------------------------------------------
 // utility functions
@@ -84,20 +85,22 @@ module filleted(r=1) {
 //------------------------------------------------------------------
 // camera board
 
-module camera_pcb_holes() {
-  h = camera_board_z + (2 * epsilon);
-  r = camera_hole_diameter/2;
-
-  basex = camera_hole_to_edge;
-  basey = camera_hole_to_edge;
+module mounting_holes(r, h) {
   dx = camera_hole_x;
   dy = camera_hole_y;
-
   posn = [[0,0], [0,1], [1,0], [1,1]];
   for (x = posn) {
-    translate([basex + x[0] * dx, basey + x[1] * dy, -epsilon])
+    translate([x[0] * dx, x[1] * dy, 0])
       cylinder(h=h, r=r, $fn=facets(r));
   }
+}
+
+module camera_pcb_holes() {
+  r = camera_hole_diameter/2;
+  h = camera_board_z + (2 * epsilon);
+  x_ofs = camera_hole_to_edge;
+  y_ofs = camera_hole_to_edge;
+  translate([x_ofs,y_ofs,-epsilon])mounting_holes(r,h);
 }
 
 module camera_pcb() {
@@ -170,6 +173,20 @@ module housing_cavity() {
     square(size=[x, y]);
 }
 
+module supports() {
+  r0 = camera_hole_to_edge;
+  h0 = housing_post_z + epsilon;
+  r1 = (camera_hole_diameter / 2) - housing_hole_clearance;
+  h1 = h0 + camera_board_z;
+  x_ofs = (housing_x - camera_hole_x) / 2;
+  y_ofs = housing_wall_t0 + housing_board_clearance + camera_hole_to_edge;
+  z_ofs = housing_base_z - epsilon;
+  translate([x_ofs,y_ofs,z_ofs]) {
+    mounting_holes(r0,h0);
+    mounting_holes(r1,h1);
+  }
+}
+
 module lid_cavity() {
   h = lid_z + epsilon;
   z_ofs = housing_z - lid_z;
@@ -199,8 +216,11 @@ module cable_cavity() {
 module housing() {
   x_ofs = -housing_x / 2;
   translate([x_ofs, 0, 0]) {
+    supports();
     difference() {
-      housing_external();
+      union() {
+        housing_external();
+      }
       union() {
         housing_cavity();
         lid_cavity();
@@ -227,10 +247,10 @@ module lid_top() {
 
 module lid_tab() {
   x = camera_cable_x + (2 * (housing_cable_clearance - housing_lid_clearance));
-  y = housing_wall_t1 + housing_lid_clearance + epsilon;
+  y = housing_wall_t1 + (housing_wall_t0 / 2);
   z = housing_z - housing_base_z - housing_post_z + (camera_connector_z / 2) - housing_cable_clearance;
   x_ofs = -x/2;
-  y_ofs = housing_y - housing_wall_t1 - housing_lid_clearance - epsilon;
+  y_ofs = housing_y - y;
   z_ofs = housing_z - z;
   translate([x_ofs,y_ofs,z_ofs])
     cube(size=[x,y,z]);
