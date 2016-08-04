@@ -54,6 +54,12 @@ lid_y = housing_y - 2 * (housing_lid_clearance + housing_wall_t1);
 lid_z = 3;
 lid_camera_clearance = 0.4; // 0.2 is too small
 
+// mounting holes
+mount_hole_to_edge = 6;
+mount_hole_diameter = 2.5;
+mount_hole_x = housing_x - (2 * mount_hole_to_edge);
+mount_hole_y = housing_y - (2 * mount_hole_to_edge);
+
 //------------------------------------------------------------------
 // utility functions
 
@@ -85,7 +91,7 @@ module filleted(r=1) {
 //------------------------------------------------------------------
 // camera board
 
-module mounting_holes(r, h) {
+module camera_holes(r, h) {
   dx = camera_hole_x;
   dy = camera_hole_y;
   posn = [[0,0], [0,1], [1,0], [1,1]];
@@ -100,7 +106,7 @@ module camera_pcb_holes() {
   h = camera_board_z + (2 * epsilon);
   x_ofs = camera_hole_to_edge;
   y_ofs = camera_hole_to_edge;
-  translate([x_ofs,y_ofs,-epsilon])mounting_holes(r,h);
+  translate([x_ofs,y_ofs,-epsilon])camera_holes(r,h);
 }
 
 module camera_pcb() {
@@ -177,13 +183,13 @@ module supports() {
   r0 = camera_hole_to_edge;
   h0 = housing_post_z + epsilon;
   r1 = (camera_hole_diameter / 2) - housing_hole_clearance;
-  h1 = h0 + camera_board_z;
+  h1 = h0 + camera_board_z - epsilon;
   x_ofs = (housing_x - camera_hole_x) / 2;
   y_ofs = housing_wall_t0 + housing_board_clearance + camera_hole_to_edge;
   z_ofs = housing_base_z - epsilon;
   translate([x_ofs,y_ofs,z_ofs]) {
-    mounting_holes(r0,h0);
-    mounting_holes(r1,h1);
+    camera_holes(r0,h0);
+    camera_holes(r1,h1);
   }
 }
 
@@ -294,8 +300,35 @@ module lid() {
 
 //------------------------------------------------------------------
 
+module mount_hole_posn(r, h) {
+  dx = mount_hole_x;
+  dy = mount_hole_y;
+  posn = [[0,0], [0,1], [1,0], [1,1]];
+  for (x = posn) {
+    translate([x[0] * dx, x[1] * dy, 0])
+      cylinder(h=h, r=r, $fn=facets(r));
+  }
+}
+
+module mount_holes() {
+  r = mount_hole_diameter / 2;
+  h = housing_z + (2 * epsilon);
+  x_ofs = mount_hole_x / 2;
+  y_ofs = (housing_y - mount_hole_y) / 2;
+  translate([-x_ofs,y_ofs,-epsilon])
+  mount_hole_posn(r=r, h=h);
+}
+
+//------------------------------------------------------------------
+
+difference () {
+  union() {
+    housing();
+    lid();
+  }
+  mount_holes();
+}
+
 camera_board();
-housing();
-lid();
 
 //------------------------------------------------------------------
