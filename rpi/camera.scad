@@ -43,7 +43,7 @@ housing_sides = 10;
 housing_rounding = 4;
 housing_x = camera_board_x + 2 * (housing_board_clearance + housing_sides);
 housing_y = camera_board_y + 2 * (housing_board_clearance + housing_wall_t0);
-housing_z = 11;
+housing_z = 12;
 housing_post_z = max(camera_connector_z, 3);
 housing_base_z = 2;
 
@@ -233,7 +233,7 @@ module lid_top() {
 module lid_camera_hole() {
   h = lid_z + (2 * epsilon); 
   r = (camera_body_diameter / 2) + lid_camera_clearance;
-  y_ofs = housing_wall_t0 + housing_board_clearance + camera_body_y_ofs;
+  y_ofs = housing_wall_t0 + housing_board_clearance + camera_body_y_ofs + (camera_body_y/2);
   z_ofs = housing_z - lid_z - epsilon;
   translate([0,y_ofs,z_ofs])
     cylinder(h=h, r=r, $fn=facets(r));
@@ -241,7 +241,7 @@ module lid_camera_hole() {
 
 module lid() {
   difference() {    
-    *lid_top();
+    lid_top();
     lid_camera_hole();
   }
 }
