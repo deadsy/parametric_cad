@@ -150,29 +150,24 @@ module camera_board() {
 
 //------------------------------------------------------------------
 
-module housing_external_2d() {
-  rounded(r=housing_rounding)
+module housing_external() {
+  linear_extrude(height=housing_z)
+    rounded(r=housing_rounding)
     square(size=[housing_x, housing_y]);
 }
 
-module housing_cavity_2d() {
+module housing_cavity() {
+  h = housing_z - housing_base_z + epsilon;
   x = camera_board_x + (2 * housing_board_clearance);
   y = camera_board_y + (2 * housing_board_clearance);
   x_ofs = (housing_x - x) / 2;
   y_ofs = (housing_y - y) / 2;
   r = camera_hole_to_edge + housing_board_clearance;
-  translate([x_ofs,y_ofs])
+  translate([0,0,housing_base_z])
+    linear_extrude(height=h)
+    translate([x_ofs,y_ofs])
     rounded(r=r)
     square(size=[x, y]);
-}
-
-module housing_external() {
-  linear_extrude(height=housing_z) housing_external_2d();
-}
-
-module housing_cavity() {
-  h = housing_z - housing_base_z + epsilon;
-  translate([0,0,housing_base_z]) linear_extrude(height=h) housing_cavity_2d();
 }
 
 module lid_cavity() {
@@ -182,7 +177,7 @@ module lid_cavity() {
     x = lid_x + housing_lid_clearance;
     y = lid_y + housing_lid_clearance;
     x_ofs = (housing_x - x) / 2;
-    y_ofs = (housing_y - y) / 2;    
+    y_ofs = (housing_y - y) / 2;
     r = housing_rounding - housing_wall_t1;
     translate([x_ofs,y_ofs])
       rounded(r=r)
@@ -230,8 +225,35 @@ module lid_top() {
   }
 }
 
+module lid_tab() {
+  x = camera_cable_x + (2 * (housing_cable_clearance - housing_lid_clearance));
+  y = housing_wall_t1 + housing_lid_clearance + epsilon;
+  z = housing_z - housing_base_z - housing_post_z + (camera_connector_z / 2) - housing_cable_clearance;
+  x_ofs = -x/2;
+  y_ofs = housing_y - housing_wall_t1 - housing_lid_clearance - epsilon;
+  z_ofs = housing_z - z;
+  translate([x_ofs,y_ofs,z_ofs])
+    cube(size=[x,y,z]);
+}
+
+module lid_rail() {
+  x = camera_hole_diameter;
+  y = camera_board_y;
+  z = housing_z - lid_z - housing_base_z - housing_post_z - camera_board_z + epsilon;
+  x_ofs = (camera_hole_x - camera_hole_to_edge) / 2;
+  y_ofs = housing_board_clearance + housing_wall_t0;
+  z_ofs = housing_base_z + housing_post_z + camera_board_z + epsilon;
+  translate([x_ofs,y_ofs,z_ofs])
+    cube(size=[x,y,z]);
+}
+
+module lid_rails() {
+  lid_rail();
+  mirror([1,0,0]) lid_rail();
+}
+
 module lid_camera_hole() {
-  h = lid_z + (2 * epsilon); 
+  h = lid_z + (2 * epsilon);
   r = (camera_body_diameter / 2) + lid_camera_clearance;
   y_ofs = housing_wall_t0 + housing_board_clearance + camera_body_y_ofs + (camera_body_y/2);
   z_ofs = housing_z - lid_z - epsilon;
@@ -240,8 +262,12 @@ module lid_camera_hole() {
 }
 
 module lid() {
-  difference() {    
-    lid_top();
+  difference() {
+    union() {
+      lid_top();
+      lid_tab();
+      lid_rails();
+    }
     lid_camera_hole();
   }
 }
