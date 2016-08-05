@@ -6,18 +6,20 @@ Housing for RPi Camera Module V2.1
 */
 //------------------------------------------------------------------
 
+// see: https://www.raspberrypi.org/documentation/hardware/camera/rpi-cam-v2_1-dimensions.pdf
+
 // camera board
-camera_board_x = 24.9;
-camera_board_y = 23.8;
-camera_board_z = 0.9;
-camera_hole_diameter = 2;
+camera_board_x = 25;
+camera_board_y = 23.9862;
+camera_board_z = 0.95;
+camera_hole_diameter = 2.2;
 camera_hole_to_edge = 2;
 camera_hole_x = 21;
 camera_hole_y = 12.5;
 
 // camera body
-camera_body_x = 8.2;
-camera_body_y = 8.2;
+camera_body_x = 8.3;
+camera_body_y = 8.3;
 camera_body_y_ofs = 10.3;
 camera_body_z0 = 2.2;
 camera_body_z1 = 4.5;
@@ -29,7 +31,7 @@ camera_cable_y = 30;
 camera_cable_z = 0.1;
 
 // camera connector
-camera_connector_x = 21.3;
+camera_connector_x = 20.8;
 camera_connector_y = 5.5;
 camera_connector_z = 2.7;
 
