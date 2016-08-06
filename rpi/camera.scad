@@ -2,11 +2,10 @@
 /*
 
 Housing for RPi Camera Module V2.1
+See: https://www.raspberrypi.org/documentation/hardware/camera/rpi-cam-v2_1-dimensions.pdf
 
 */
 //------------------------------------------------------------------
-
-// see: https://www.raspberrypi.org/documentation/hardware/camera/rpi-cam-v2_1-dimensions.pdf
 
 // camera board
 camera_board_x = 25;
@@ -54,11 +53,11 @@ housing_base_z = 2;
 lid_x = housing_x - 2 * (housing_lid_clearance + housing_wall_t1);
 lid_y = housing_y - 2 * (housing_lid_clearance + housing_wall_t1);
 lid_z = 3;
-lid_camera_clearance = 0.4; // 0.2 is too small
+lid_camera_clearance = 0.4;
 
 // mounting holes
 mount_hole_to_edge = 6;
-mount_hole_diameter = 2.5;
+mount_hole_diameter = 3;
 mount_hole_x = housing_x - (2 * mount_hole_to_edge);
 mount_hole_y = housing_y - (2 * mount_hole_to_edge);
 
