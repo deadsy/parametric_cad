@@ -12,7 +12,7 @@ lidar_width1 = 43.7;
 lidar_length = 72.6;
 lidar_pillar_diameter0 = 9.4;
 lidar_pillar_diameter1 = 6;
-lidar_pillar_step = 4;
+lidar_pillar_step = 1.6;
 
 // preferences
 lidar_base_width = 15;
