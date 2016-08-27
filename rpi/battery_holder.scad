@@ -3,20 +3,21 @@
 
 Battery Holder
 
-2 x 3000 mAh 7.2V battery backs
+2 x 3000 mAh 7.2V battery packs
 See- http://www.tenergy.com, Item #11204-01
 
 */
 //------------------------------------------------------------------
+/* [Global] */
 
-// measurements taken from batteries
+/*[General]*/
 box_h = 34;
 box_w = 49; // 2 batteries side by side
 box_l = 136; // slightly longer to allow diagonal insertion
 connector_d = 15; // hole for tamiya connector pass-thru
 connector_z = 23; // z position of connector hole
 
-// preferences
+/*[Preferences]*/
 wall_t = 3; // wall thickness
 wall_r = 1.5; // wall corner rounding
 foot_inset = 6; // foot inset
@@ -26,6 +27,7 @@ foot_l = 12; // foot length
 foot_hole_d = 3; // hole diameter for mounting foot
 hole_to_edge = 6;
 
+/* [Hidden] */
 //------------------------------------------------------------------
 
 // small tweak to avoid differencing artifacts
