@@ -5,16 +5,18 @@
 
 */
 //------------------------------------------------------------------
+/* [Global] */
 
+/*[General]*/
 mount_width = 39.69;
 mount_length = 44.45;
 mount_height = 15;
 mount_base_z = 3;
 mount_hole_diameter = 3;
-
 pillar_diameter = 6.5;
 pillar_hole_diameter = 2;
 
+/* [Hidden] */
 //------------------------------------------------------------------
 
 // small tweak to avoid differencing artifacts

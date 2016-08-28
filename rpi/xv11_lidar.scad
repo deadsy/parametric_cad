@@ -6,6 +6,10 @@ Mount for XV11 Lidar Unit
 */
 //------------------------------------------------------------------
 
+use <pcb_clip.scad>;
+
+//------------------------------------------------------------------
+
 // measurements taken from device
 lidar_width0 = 73.5;
 lidar_width1 = 43.7;
@@ -19,7 +23,7 @@ lidar_base_width = 15;
 lidar_height = 30;
 lidar_base_z = 4;
 lidar_mount_hole_diameter = 3;
-lidar_pillar_hole_diamater = 2;
+lidar_pillar_hole_diameter = 2;
 
 //------------------------------------------------------------------
 
@@ -218,7 +222,7 @@ module lidar_pillar() {
     pillar_radius0 = lidar_pillar_diameter0 / 2,
     pillar_radius1 = lidar_pillar_diameter1 / 2,
     hole_depth = lidar_height / 3,
-    hole_radius = lidar_pillar_hole_diamater / 2,
+    hole_radius = lidar_pillar_hole_diameter / 2,
     number_webs = 4,
     web_height = lidar_height / 1.2,
     web_radius = lidar_base_width / 2.1,
@@ -261,11 +265,26 @@ module lidar_mount_holes() {
   translate([-x1,y1]) lidar_mount_hole();
 }
 
+module pwm_clip() {
+  z_ofs = lidar_base_z - epsilon;
+  translate([0,0,z_ofs])
+  clip_pair(
+    pcb_height = 5,
+    pcb_thickness = 1.5,
+    clip_height = 2,
+    clip_thickness = 2.5,
+    clip_depth = 1,
+    clip_width = 9,
+    clip_distance = 20.8
+  );
+}
+
 module lidar_mount() {
   difference() {
     union() {
       lidar_base();
       lidar_pillars();
+      pwm_clip();
     }
     lidar_mount_holes();
   }
