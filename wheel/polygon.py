@@ -4,47 +4,54 @@ Polygons
 """
 #------------------------------------------------------------------------------
 
+import math
+
 import dxfwrite
 from dxfwrite import DXFEngine as dxf
-
-import math
-import util
 
 #------------------------------------------------------------------------------
 # 2D vector math
 
 def add(a, b):
+  """add 2d vectors"""
   return (a[0] + b[0], a[1] + b[1])
 
 def sub(a, b):
+  """subtract 2 vectors"""
   return (a[0] - b[0], a[1] - b[1])
 
 def scale(a, k):
+  """scale a 2d vector by k"""
   return (k * a[0], k * a[1])
 
 def dot(a, b):
+  """return the 2d dot product"""
   return (a[0] * b[0]) + (a[1] * b[1])
 
 def cross(a, b):
+  """return the 2d cross product"""
   return (a[0] * b[1]) - (a[1] * b[0])
 
 def length(a):
+  """return the length of a 2d vector"""
   return math.sqrt(dot(a, a))
 
 def normalise(a):
+  """scale a 2d vector to length 1"""
   return scale(a, 1/length(a))
 
 def rot_matrix(theta):
-    """rotation matrix: theta radians about the origin"""
-    c = math.cos(theta)
-    s = math.sin(theta)
-    return (c, -s, s, c)
+  """rotation matrix: theta radians about the origin"""
+  c = math.cos(theta)
+  s = math.sin(theta)
+  return (c, -s, s, c)
 
 def mult_matrix(a, v):
-    """return x = A.v"""
-    return ((a[0] * v[0]) + (a[1] * v[1]), (a[2] * v[0]) + (a[3] * v[1]))
+  """return x = A.v"""
+  return ((a[0] * v[0]) + (a[1] * v[1]), (a[2] * v[0]) + (a[3] * v[1]))
 
 def sign(a):
+  """return +1, -1 or 0"""
   return (a > 0) - (a < 0)
 
 #------------------------------------------------------------------------------
@@ -55,14 +62,14 @@ class point(object):
   # radius for marking the point on a dxf drawing
   dxf_radius = 1.0
 
-  def __init__(self, p, facets = 0, radius = 0.0):
+  def __init__(self, p, facets=0, radius=0.0):
     self.p = p
     self.facets = facets
     self.radius = radius
 
   def emit_dxf(self, d):
-    color = (1,2)[self.radius == 0.0]
-    d.add(dxf.circle(center = (self.p[0], self.p[1]), radius = self.dxf_radius, color = color))
+    color = (1, 2)[self.radius == 0.0]
+    d.add(dxf.circle(center=(self.p[0], self.p[1]), radius=self.dxf_radius, color=color))
 
   def emit_scad(self):
     return '[%f, %f],' % (self.p[0], self.p[1])
@@ -91,16 +98,19 @@ class polygon(object):
     return self.points[i - 1]
 
   def smooth_point(self, i):
-    """smooth a point- return True if we smoothed it"""
+    """smooth the i-th point- return True if we smoothed it"""
     p = self.points[i]
+
     if p.radius == 0.0:
       # fixed point
-      return
+      return False
+
     pn = self.next_point(i)
     pp = self.prev_point(i)
     if pp is None or pn is None:
       # can't smooth the endpoints of an open polygon
       return False
+
     # work out the angle
     v0 = normalise(sub(pp.p, p.p))
     v1 = normalise(sub(pn.p, p.p))
@@ -108,12 +118,9 @@ class polygon(object):
 
     # distance from vertex to circle tangent
     d1 = p.radius / math.tan(theta / 2.0)
-    if d1 > length(sub(pp.p, p.p)):
-      print('unable to smooth - radius is too large')
-      return
-    if d1 > length(sub(pn.p, p.p)):
-      print('unable to smooth - radius is too large')
-      return
+    if d1 > length(sub(pp.p, p.p)) or d1 > length(sub(pn.p, p.p)):
+      # unable to smooth - radius is too large
+      return False
 
     # tangent points
     p0 = add(p.p, scale(v0, d1))
@@ -155,7 +162,7 @@ class polygon(object):
       p.emit_dxf(d)
       x.append((p.p[0], p.p[1]))
     flags = (0, dxfwrite.POLYLINE_CLOSED)[self.closed]
-    d.add(dxf.polyline(x, flags = flags))
+    d.add(dxf.polyline(x, flags=flags))
 
   def emit_scad(self):
     s = []
