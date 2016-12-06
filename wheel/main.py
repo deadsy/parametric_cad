@@ -2,8 +2,9 @@
 #------------------------------------------------------------------------------
 
 from polygon import *
-
 from dxfwrite import DXFEngine as dxf
+
+import math
 
 #------------------------------------------------------------------------------
 
@@ -24,10 +25,7 @@ def build_polygon():
     point((0.0, 100.0)),
   ]
 
-  p = polygon(closed = False)
-  for x in points:
-    p.add(x)
-  return p
+  return polygon(points, closed=False)
 
 #------------------------------------------------------------------------------
 
@@ -35,7 +33,14 @@ def main():
 
   p = build_polygon()
   p.smooth()
+
   output_dxf(p, 'test.dxf')
+
+  print p.emit_polygon('test0')
+  print p.emit_linear('test1', 3)
+  print p.emit_rotate('test2')
+  print p.emit_rotate('test3', angle=math.pi)
+
 
 main()
 

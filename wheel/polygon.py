@@ -1,6 +1,9 @@
 #------------------------------------------------------------------------------
 """
-Polygons
+Smoothable Polygons
+
+Polygons are be expressed as a point list.
+The smoothing for each polygon point can be specified.
 """
 #------------------------------------------------------------------------------
 
@@ -8,6 +11,8 @@ import math
 
 import dxfwrite
 from dxfwrite import DXFEngine as dxf
+
+import util
 
 #------------------------------------------------------------------------------
 # 2D vector math
@@ -63,39 +68,48 @@ class point(object):
   dxf_radius = 1.0
 
   def __init__(self, p, facets=0, radius=0.0):
+    """specify a smoothable point"""
     self.p = p
-    self.facets = facets
-    self.radius = radius
+    self.facets = facets # number of facets in smoothing
+    self.radius = radius # radius of smoothing
 
   def emit_dxf(self, d):
+    """emit dxf code for the point"""
     color = (1, 2)[self.radius == 0.0]
     d.add(dxf.circle(center=(self.p[0], self.p[1]), radius=self.dxf_radius, color=color))
 
   def emit_scad(self):
+    """emit openscad code for the point"""
     return '[%f, %f],' % (self.p[0], self.p[1])
 
 #------------------------------------------------------------------------------
 
 class polygon(object):
 
-  def __init__(self, closed):
-    self.points = []
+  def __init__(self, points=[], closed=False):
+    """create a polygon"""
+    self.points = points
     self.closed = closed
 
   def add(self, p):
+    """add a point to the polygon point list"""
     self.points.append(p)
 
   def next_point(self, i):
-    """next point"""
+    """return the next point on the polygon list"""
     if i == len(self.points) - 1:
       return (None, self.points[0])[self.closed]
     return self.points[i + 1]
 
   def prev_point(self, i):
-    """previous point"""
+    """return the previous point on the polygon list"""
     if i == 0:
       return (None, self.points[-1])[self.closed]
     return self.points[i - 1]
+
+  def max_x(self):
+    """return the maximum x value of the polygon points"""
+    return max([p.p[0] for p in self.points])
 
   def smooth_point(self, i):
     """smooth the i-th point- return True if we smoothed it"""
@@ -145,18 +159,17 @@ class polygon(object):
       rv = mult_matrix(rm, rv)
     return True
 
-  def smooth_single(self):
-    """smooth the polygon"""
-    for i in range(len(self.points)):
-      if self.smooth_point(i):
-        return True
-    return False
-
   def smooth(self):
-    while self.smooth_single():
-      pass
+    """smooth the polygon"""
+    done = False
+    while not done:
+      done = True
+      for i in range(len(self.points)):
+        if self.smooth_point(i):
+          done = False
 
   def emit_dxf(self, d):
+    """emit the dxf code for the polygon"""
     x = []
     for p in self.points:
       p.emit_dxf(d)
@@ -164,45 +177,28 @@ class polygon(object):
     flags = (0, dxfwrite.POLYLINE_CLOSED)[self.closed]
     d.add(dxf.polyline(x, flags=flags))
 
-  def emit_scad(self):
+  def emit_polygon(self, name, convexity=2, extrude=''):
+    """emit an openscad module for the polygon"""
     s = []
-    s.append('module %s() {' % self.name)
+    s.append('module %s() {' % name)
     s.append('points = [')
     s.extend([p.emit_scad() for p in self.points])
     s.append('];')
-    s.append('polygon(points=points, convexity = 2);')
+    s.append('%spolygon(points=points, convexity=%d);' % (extrude, convexity))
     s.append('}')
     return '\n'.join(s)
 
-#------------------------------------------------------------------------------
+  def emit_linear(self, name, l, convexity=2):
+    """emit openscad code for a 3d linear extrusion"""
+    return self.emit_polygon(name, convexity, extrude='linear_extrude(height=%f) ' % l)
 
-class linear_extrude(object):
-  """linear extrusion of polygon"""
-
-  def __init__(self, name):
-    self.name = '%s_extrusion' % name
-
-  def emit_scad(self):
-    s = []
-    s.append(self.profile.emit_scad())
-    s.append('module %s() {' % self.name)
-    s.append('linear_extrude(height=%f) {%s();}' % (self.length, self.profile.name))
-    s.append('}')
-    return '\n'.join(s)
-
-
-class rotate_extrude(object):
-  """rotational extrusion of polygon"""
-
-  def __init__(self, name):
-    self.name = '%s_extrusion' % name
-
-  def emit_scad(self):
-    s = []
-    s.append(self.profile.emit_scad())
-    s.append('module %s() {' % self.name)
-    s.append('rotate_extrude(angle = %f, $fn = %d) {%s();}' % (self.angle, self.facets, self.profile.name))
-    s.append('}')
-    return '\n'.join(s)
+  def emit_rotate(self, name, angle=None, convexity=2):
+    """emit openscad code for a 3d rotated extrusion"""
+    facets = util.facets(self.max_x())
+    if angle is None:
+      cmd = 'rotate_extrude($fn=%d) ' % facets
+    else:
+      cmd = 'rotate_extrude(angle=%f, $fn=%d) ' % (util.r2d(angle), facets)
+    return self.emit_polygon(name, convexity, extrude=cmd)
 
 #------------------------------------------------------------------------------
