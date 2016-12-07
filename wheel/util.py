@@ -16,11 +16,6 @@ epsilon = 0.05
 
 #------------------------------------------------------------------------------
 
-def dim(x):
-  """scale a nominal dimension"""
-  scale = 1.0/0.98 # 2% Al shrinkage
-  return scale * float(x)
-
 def d2r(d):
   """degrees to radians"""
   return (float(d) / 180.0) * math.pi
