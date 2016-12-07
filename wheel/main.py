@@ -1,5 +1,10 @@
 #!/usr/bin/python
 #------------------------------------------------------------------------------
+"""
+Parameteric Pottery Wheel Generation
+See: https://github.com/deadsy/parametric_cad/tree/master/wheel
+"""
+#------------------------------------------------------------------------------
 
 import math
 
@@ -11,8 +16,8 @@ import util
 # overall build controls
 
 scale = 1.0/0.98      # 2% Al shrinkage
-core_print = True     # add the core print to the wheel
-pie_print = True      # create a 1/n pie segment (n = number of webs)
+core_print = False     # add the core print to the wheel
+pie_print = False      # create a 1/n pie segment (n = number of webs)
 
 #------------------------------------------------------------------------------
 
@@ -27,7 +32,7 @@ draft_angle = util.d2r(4.0) # standard overall draft
 core_draft_angle = util.d2r(10.0) # draft angle for the core print
 
 # nominal size values (mm)
-wheel_diameter = 25.4 * 12.0  # total wheel diameter
+wheel_diameter = util.mm_per_in * 12.0  # total wheel diameter
 hub_diameter = 40.0           # base diameter of central shaft hub
 hub_height = 53.0             # height of cental shaft hub
 shaft_diameter = 21           # 1" target size - reduced for machining allowance
@@ -141,19 +146,89 @@ def output_dxf(p, fname):
 
 #------------------------------------------------------------------------------
 
-def main():
+def output_wheel(fname):
+  """output scad for the wheel"""
 
   wheel= wheel_profile()
   web = web_profile()
+
+  f = open(fname, 'w')
+  f.write('%s\n' % util.scad_comment(__doc__))
+  f.write('%s\n' % web.emit_linear('web', web_l))
+
+  theta = (2.0 * math.pi) / number_of_webs
+
+  if pie_print:
+    f.write('rotate([0,0,%f])\n' % (util.r2d(theta) * (float(number_of_webs) + 2.0)/4.0));
+    f.write('translate([0,%f,%f])\n' % (-shaft_r, plate_t - util.epsilon))
+    f.write('rotate([90,0,0])\n')
+    f.write('web();\n')
+    f.write('%s\n' % wheel.emit_rotate('wheel', angle=theta))
+    f.write('wheel();\n')
+  else:
+    f.write('for (i = [1:%d]) {\n' % number_of_webs)
+    f.write('rotate([0,0,i * %f])\n' % util.r2d(theta));
+    f.write('translate([0,%f,%f])\n' % (-shaft_r, plate_t - util.epsilon))
+    f.write('rotate([90,0,0])\n')
+    f.write('web();\n')
+    f.write('}\n')
+    f.write('%s\n' % wheel.emit_rotate('wheel'))
+    f.write('wheel();\n')
+
+  f.close()
+
+#------------------------------------------------------------------------------
+
+def output_core_box(fname):
+  """output scad for the core box"""
   core = core_profile()
 
-  output_dxf(core, 'core.dxf')
-  output_dxf(web, 'web.dxf')
-  output_dxf(wheel, 'wheel.dxf')
+  f = open(fname, 'w')
+  f.write('%s\n' % util.scad_comment(__doc__))
+  f.write('%s\n' % core.emit_rotate('core'))
 
-  print core.emit_rotate('core')
-  print web.emit_linear('web', web_l)
-  print wheel.emit_rotate('wheel')
+  w = 4.2 * shaft_r
+  d = 1.2 * shaft_r
+  h = (core_h + shaft_l) * 1.1
+
+  hole_r = ((3.0/16.0) * util.mm_per_in) / 2.0
+
+  f.write('module hole() {\n')
+  f.write('rotate([0,-90,0]) cylinder(h=%f,r=%f,$fn=%d);\n' % (d, hole_r, util.facets(hole_r)))
+  f.write('}\n')
+
+  dy = w * 0.37
+  x0 = h * 0.1
+  x1 = h * 0.9
+
+  f.write('module holes() {\n')
+  f.write('translate([0,%f,%f]) hole();\n' % (dy,x0))
+  f.write('translate([0,%f,%f]) hole();\n' % (-dy,x0))
+  f.write('translate([0,%f,%f]) hole();\n' % (dy,x1))
+  f.write('translate([0,%f,%f]) hole();\n' % (-dy,x1))
+  f.write('}\n')
+
+  f.write('rotate([0,-90,0])\n')
+  f.write('difference() {\n')
+  f.write('translate([%f,%f,0]) cube([%f,%f,%f]);\n' % (-d, -w/2, d, w, h))
+  f.write('union() {\n')
+  f.write('core();\n')
+  f.write('holes();\n')
+  f.write('}\n')
+  f.write('}\n')
+
+  f.close()
+
+#------------------------------------------------------------------------------
+
+def main():
+
+  #output_dxf(core, 'core.dxf')
+  #output_dxf(web, 'web.dxf')
+  #output_dxf(wheel, 'wheel.dxf')
+
+  output_wheel('wheel.scad')
+  output_core_box('core_box.scad')
 
 main()
 

@@ -7,6 +7,11 @@ common utility functions
 import math
 
 #------------------------------------------------------------------------------
+# constants
+
+mm_per_in = 25.4
+
+#------------------------------------------------------------------------------
 
 # control the faceting error for rotations
 facet_epsilon = 0.01
@@ -27,5 +32,11 @@ def r2d(r):
 def facets(r):
   """return the required number of polygon facets for a given radius"""
   return int(math.pi / math.acos(1 - (facet_epsilon / r)))
+
+#------------------------------------------------------------------------------
+
+def scad_comment(s):
+  """return the string as an openscad comment"""
+  return '\n'.join(['// %s' % l for l in s.split('\n')])
 
 #------------------------------------------------------------------------------
